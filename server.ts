@@ -1,45 +1,31 @@
 import Fastify, { FastifyRequest } from 'fastify'
 import { readFileSync } from 'fs';
+import { getTaskById, getAllTasks, deleteTaskById, addTask, updateTask } from './task_service';
 
 const fastify = Fastify({
 	logger: true
 })
-
-type Task = {
-	id: number;
-	title: string;
-	completed: boolean;
-}
-
-type TaskValidationResult = {
-	errors: string[];
-	task?: Task;
-}
-
-let tasks: Task[] = [
-	{ id: 1, title: "Feed pets", completed: false }
-]
 
 fastify.get('/', async (request, response) => {
 	response.type('text/html').send(readFileSync('index.html'))
 })
 
 fastify.get('/tasks', async (request, response) => {
-	response.send(tasks)
+	response.send(getAllTasks())
 })
 
 fastify.get('/task/:taskId', async (request: FastifyRequest<{ Params: { taskId: string } }>, response) => {
-	const task = getTaskById(request.params.taskId)
+	const task = getTaskById(parseId(request.params.taskId))
 	if (!task) return response.code(404).send({ statusCode: 404, error: "Not found" })
 
 	response.send(task)
 })
 
 fastify.delete('/task/:taskId', async (request: FastifyRequest<{ Params: { taskId: string } }>, response) => {
-	const taskToDelete = getTaskById(request.params.taskId)
+	const taskToDelete = getTaskById(parseId(request.params.taskId))
 	if (!taskToDelete) return response.code(404).send({ statusCode: 404, error: "Not found" })
 
-	tasks = tasks.filter(task => task.id != taskToDelete.id)
+	deleteTaskById(taskToDelete.id)
 	response.send(taskToDelete)
 })
 
@@ -55,19 +41,16 @@ fastify.post('/tasks', {
 		}
 	}
 }, async (request: FastifyRequest<{ Body: { title: string, completed?: boolean } }>, response) => {
-	const task = {
-		id: Math.max(...tasks.map(task => task.id)) + 1,
-		title: request.body.title,
-		completed: !!request.body.completed
+	try {
+		const task = addTask({ title: request.body.title, completed: request.body.completed })
+		response.send(task)
+	} catch (e) {
+		return response.code(400).send({
+			statusCode: 400,
+			error: "Bad Request",
+			message: e instanceof Error ? e.message : undefined
+		})
 	}
-	if (!task.title || task.title.length < 1) return response.code(400).send({
-		statusCode: 400,
-		error: "Bad Request",
-		message: "property 'title' must be at least 1 character long"
-	})
-
-	tasks.push(task)
-	response.send(task)
 })
 
 fastify.put('/tasks', {
@@ -85,17 +68,18 @@ fastify.put('/tasks', {
 }, async (request: FastifyRequest<{ Body: { id: string, title: string, completed?: boolean } }>, response) => {
 	const { id, title, completed } = request.body
 
-	const task = getTaskById(id)
-	if (!task) return response.code(404).send({ statusCode: 404, error: "Not found" })
-	if (title && title.length < 1) return response.code(400).send({
-		statusCode: 400,
-		error: "Bad Request",
-		message: "property 'title' must be at least 1 character long"
-	})
-	if (title) task.title = title
-	if (completed !== undefined) task.completed = completed
+	try {
+		const task = updateTask({ id: parseId(id), title, completed })
+		if (task) return response.send(task)
 
-	response.send(task)
+		return response.code(404).send({ statusCode: 404, error: "Not found" })
+	} catch (e) {
+		return response.code(400).send({
+			statusCode: 400,
+			error: "Bad Request",
+			message: e instanceof Error ? e.message : undefined
+		})
+	}
 })
 
 fastify.listen({ port: 3000 }, function (error) {
@@ -105,8 +89,6 @@ fastify.listen({ port: 3000 }, function (error) {
 	}
 })
 
-function getTaskById(taskId: any): Task | undefined {
-	taskId = parseInt(new String(taskId).toString())
-
-	if (taskId) return tasks.find((task) => task.id == taskId)
+function parseId(id: any): number | undefined {
+	return parseInt(new String(id).toString())
 }
