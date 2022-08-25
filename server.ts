@@ -1,5 +1,6 @@
-import Fastify, { FastifyRequest } from 'fastify'
+import Fastify, { FastifyReply, FastifyRequest } from 'fastify'
 import { readFileSync } from 'fs';
+import { addTaskSchema, updateTaskSchema } from './schemas';
 import { getTaskById, getAllTasks, deleteTaskById, addTask, updateTask } from './task_service';
 
 const fastify = Fastify({
@@ -29,43 +30,16 @@ fastify.delete('/task/:taskId', async (request: FastifyRequest<{ Params: { taskI
 	response.send(taskToDelete)
 })
 
-fastify.post('/tasks', {
-	schema: {
-		body: {
-			type: 'object',
-			properties: {
-				title: { type: 'string' },
-				completed: { type: 'string' },
-			},
-			required: ['title']
-		}
-	}
-}, async (request: FastifyRequest<{ Body: { title: string, completed?: boolean } }>, response) => {
+fastify.post('/tasks', { schema: addTaskSchema }, async (request: FastifyRequest<{ Body: { title: string, completed?: boolean } }>, response) => {
 	try {
 		const task = addTask({ title: request.body.title, completed: request.body.completed })
 		response.send(task)
 	} catch (e) {
-		return response.code(400).send({
-			statusCode: 400,
-			error: "Bad Request",
-			message: e instanceof Error ? e.message : undefined
-		})
+		return handleError(response, e)
 	}
 })
 
-fastify.put('/tasks', {
-	schema: {
-		body: {
-			type: 'object',
-			properties: {
-				id: { type: 'number' },
-				title: { type: 'string' },
-				completed: { type: 'string' },
-			},
-			required: ['id']
-		}
-	}
-}, async (request: FastifyRequest<{ Body: { id: string, title: string, completed?: boolean } }>, response) => {
+fastify.put('/tasks', { schema: updateTaskSchema }, async (request: FastifyRequest<{ Body: { id: string, title: string, completed?: boolean } }>, response) => {
 	const { id, title, completed } = request.body
 
 	try {
@@ -74,11 +48,7 @@ fastify.put('/tasks', {
 
 		return response.code(404).send({ statusCode: 404, error: "Not found" })
 	} catch (e) {
-		return response.code(400).send({
-			statusCode: 400,
-			error: "Bad Request",
-			message: e instanceof Error ? e.message : undefined
-		})
+		return handleError(response, e)
 	}
 })
 
@@ -91,4 +61,12 @@ fastify.listen({ port: 3000 }, function (error) {
 
 function parseId(id: any): number | undefined {
 	return parseInt(new String(id).toString())
+}
+
+function handleError(response: FastifyReply, e: unknown) {
+	response.code(400).send({
+		statusCode: 400,
+		error: "Bad Request",
+		message: e instanceof Error ? e.message : undefined
+	})
 }
