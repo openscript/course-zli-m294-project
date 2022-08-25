@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "@fastify/secure-session": "^5.2.0",
+    "@fastify/cookie": "^8.0.0",
+    "@fastify/session": "^9.0.0",
     "fastify": "^4.5.2",
     "ts-node": "^10.9.1",
     "typescript": "*"
