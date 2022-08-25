@@ -130,7 +130,7 @@ fastify.post('/auth/cookie/login', { schema: loginSchema }, async (request: Fast
 		request.session.email = email
 		return response.send('ok')
 	} else {
-		return response.code(401).send({ statusCode: 401, message: 'invalid credentials, use «m294» as password', })
+		return response.code(400).send({ statusCode: 400, message: 'invalid credentials, use «m294» as password', })
 	}
 })
 
