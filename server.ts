@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import { readFileSync } from 'fs';
 import setupPlainEndpoint from './endpoints/plain';
 import setupCookieEndpoint from './endpoints/cookie';
+import setupJwtEndpoint from './endpoints/jwt';
 
 const fastify = Fastify({
 	logger: true
@@ -9,6 +10,7 @@ const fastify = Fastify({
 
 setupPlainEndpoint(fastify)
 setupCookieEndpoint(fastify)
+setupJwtEndpoint(fastify)
 
 fastify.get('/', async (request, response) => {
 	response.type('text/html').send(readFileSync('index.html'))

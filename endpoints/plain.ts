@@ -3,14 +3,13 @@ import { error, parseId } from '../helpers';
 import { addTaskSchema, updateTaskSchema } from '../schemas';
 import { getTaskById, getAllTasks, deleteTaskById, addTask, updateTask } from '../task_service';
 
-
 export default function setup(fastify: FastifyInstance) {
 
 	fastify.get('/tasks', async (request, response) => {
 		response.send(getAllTasks())
 	})
 
-	fastify.get('/task/:taskId', async (request: FastifyRequest<{ Params: { taskId: string } }>, response) => {
+	fastify.get('/task/:taskId', {}, async (request: FastifyRequest<{ Params: { taskId: string } }>, response) => {
 		const task = getTaskById(parseId(request.params.taskId))
 		if (!task) return response.code(404).send({ statusCode: 404, error: "Not found" })
 
