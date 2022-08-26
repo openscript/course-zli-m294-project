@@ -1,48 +1,82 @@
-import { FastifyInstance, FastifyRequest } from 'fastify'
+import { FastifyInstance, RouteOptions } from 'fastify'
+import { Server, IncomingMessage, ServerResponse } from 'http';
 import { error, parseId } from '../helpers';
 import { addTaskSchema, updateTaskSchema } from '../schemas';
-import { getTaskById, getAllTasks, deleteTaskById, addTask, updateTask } from '../task_service';
+import * as taskService from '../task_service';
 
 export default function setup(fastify: FastifyInstance) {
+	fastify.route(listTasks)
+	fastify.route(showTask)
+	fastify.route(deleteTask)
+	fastify.route(updateTask)
+	fastify.route(createTask)
+}
 
-	fastify.get('/tasks', async (request, response) => {
-		response.send(getAllTasks())
-	})
+const listTasks: RouteOptions<Server, IncomingMessage, ServerResponse, {}> = {
+	method: "GET",
+	url: '/tasks',
+	handler: async (request, response) => {
+		response.send(taskService.getAllTasks())
+	}
+}
 
-	fastify.get('/task/:taskId', {}, async (request: FastifyRequest<{ Params: { taskId: string } }>, response) => {
-		const task = getTaskById(parseId(request.params.taskId))
+const showTask: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: { taskId: string } }> = {
+	method: "GET",
+	url: '/task/:taskId',
+	handler: async (request, response) => {
+		const task = taskService.getTaskById(parseId(request.params.taskId))
 		if (!task) return response.code(404).send({ statusCode: 404, error: "Not found" })
 
 		response.send(task)
-	})
+	}
+}
 
-	fastify.delete('/task/:taskId', async (request: FastifyRequest<{ Params: { taskId: string } }>, response) => {
-		const taskToDelete = getTaskById(parseId(request.params.taskId))
+const deleteTask: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: { taskId: string } }> = {
+	method: "DELETE",
+	url: '/task/:taskId',
+	handler: async (request, response) => {
+		const taskToDelete = taskService.getTaskById(parseId(request.params.taskId))
 		if (!taskToDelete) return response.code(404).send({ statusCode: 404, error: "Not found" })
 
-		deleteTaskById(taskToDelete.id)
+		taskService.deleteTaskById(taskToDelete.id)
 		response.send(taskToDelete)
-	})
+	}
+}
 
-	fastify.post('/tasks', { schema: addTaskSchema }, async (request: FastifyRequest<{ Body: { title: string, completed?: boolean } }>, response) => {
+const createTask: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: { title: string, completed?: boolean } }> = {
+	method: "POST",
+	url: '/tasks',
+	schema: addTaskSchema,
+	handler: async (request, response) => {
 		try {
-			const task = addTask({ title: request.body.title, completed: request.body.completed })
+			const task = taskService.addTask({ title: request.body.title, completed: request.body.completed })
 			response.send(task)
 		} catch (e) {
 			return response.code(400).send(error(400, (e as Error).message))
 		}
-	})
+	}
+}
 
-	fastify.put('/tasks', { schema: updateTaskSchema }, async (request: FastifyRequest<{ Body: { id: string, title: string, completed?: boolean } }>, response) => {
+const updateTask: RouteOptions<Server, IncomingMessage, ServerResponse, {
+	Body: {
+		id: string, title: string, completed?: boolean
+	}
+}> = {
+	method: "PUT",
+	url: '/tasks',
+	schema: updateTaskSchema,
+	handler: async (request, response) => {
 		const { id, title, completed } = request.body
 
 		try {
-			const task = updateTask({ id: parseId(id), title, completed })
+			const task = taskService.updateTask({ id: parseId(id), title, completed })
 			if (task) return response.send(task)
 
 			return response.code(404).send({ statusCode: 404, error: "Not found" })
 		} catch (e) {
 			return response.code(400).send(error(400, (e as Error).message))
 		}
-	})
+	}
 }
+
+export const routes = { listTasks, showTask, createTask, updateTask, deleteTask }

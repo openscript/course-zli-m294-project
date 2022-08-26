@@ -1,10 +1,9 @@
 import fastifyCookie from '@fastify/cookie';
 import fastifySession from '@fastify/session';
-import { FastifyInstance, FastifyReply, FastifyRequest, RouteOptions } from 'fastify'
-import { Server, IncomingMessage, ServerResponse } from 'http';
-import { error, parseId } from '../helpers';
-import { addTaskSchema, loginSchema, updateTaskSchema } from '../schemas';
-import * as taskService from '../task_service';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { error } from '../helpers';
+import { loginSchema } from '../schemas';
+import { routes } from './plain'
 
 declare module "fastify" {
 	interface Session {
@@ -25,11 +24,11 @@ export default function setup(fastify: FastifyInstance) {
 		cookie: { secure: false, httpOnly: true },
 	})
 
-	fastify.route(listTasks)
-	fastify.route(showTask)
-	fastify.route(deleteTask)
-	fastify.route(updateTask)
-	fastify.route(createTask)
+	fastify.route({ ...routes.listTasks, url: '/auth/cookie/tasks', onRequest: authenticate })
+	fastify.route({ ...routes.showTask, url: '/auth/cookie/task/:taskId', onRequest: authenticate })
+	fastify.route({ ...routes.createTask, url: '/auth/cookie/tasks', onRequest: authenticate })
+	fastify.route({ ...routes.updateTask, url: '/auth/cookie/tasks', onRequest: authenticate })
+	fastify.route({ ...routes.deleteTask, url: '/auth/cookie/task/:taskId', onRequest: authenticate })
 
 	fastify.get('/auth/cookie/status', { onRequest: authenticate }, async (request, response) => {
 		response.send({ email: request.session.email })
@@ -50,76 +49,4 @@ export default function setup(fastify: FastifyInstance) {
 		request.session.destroy()
 		reply.send('ok')
 	})
-}
-
-const listTasks: RouteOptions<Server, IncomingMessage, ServerResponse, {}> = {
-	method: "GET",
-	url: '/auth/cookie/tasks',
-	onRequest: authenticate,
-	handler: async (request, response) => {
-		response.send(taskService.getAllTasks())
-	}
-}
-
-const showTask: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: { taskId: string } }> = {
-	method: "GET",
-	url: '/auth/cookie/task/:taskId',
-	onRequest: authenticate,
-	handler: async (request, response) => {
-		const task = taskService.getTaskById(parseId(request.params.taskId))
-		if (!task) return response.code(404).send({ statusCode: 404, error: "Not found" })
-
-		response.send(task)
-	}
-}
-
-const deleteTask: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: { taskId: string } }> = {
-	method: "DELETE",
-	url: '/auth/cookie/task/:taskId',
-	onRequest: authenticate,
-	handler: async (request, response) => {
-		const taskToDelete = taskService.getTaskById(parseId(request.params.taskId))
-		if (!taskToDelete) return response.code(404).send({ statusCode: 404, error: "Not found" })
-
-		taskService.deleteTaskById(taskToDelete.id)
-		response.send(taskToDelete)
-	}
-}
-
-const createTask: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: { title: string, completed?: boolean } }> = {
-	method: "POST",
-	url: '/auth/cookie/tasks',
-	schema: addTaskSchema,
-	onRequest: authenticate,
-	handler: async (request, response) => {
-		try {
-			const task = taskService.addTask({ title: request.body.title, completed: request.body.completed })
-			response.send(task)
-		} catch (e) {
-			return response.code(400).send(error(400, (e as Error).message))
-		}
-	}
-}
-
-const updateTask: RouteOptions<Server, IncomingMessage, ServerResponse, {
-	Body: {
-		id: string, title: string, completed?: boolean
-	}
-}> = {
-	method: "PUT",
-	url: '/auth/cookie/tasks',
-	schema: updateTaskSchema,
-	onRequest: authenticate,
-	handler: async (request, response) => {
-		const { id, title, completed } = request.body
-
-		try {
-			const task = taskService.updateTask({ id: parseId(id), title, completed })
-			if (task) return response.send(task)
-
-			return response.code(404).send({ statusCode: 404, error: "Not found" })
-		} catch (e) {
-			return response.code(400).send(error(400, (e as Error).message))
-		}
-	}
 }
