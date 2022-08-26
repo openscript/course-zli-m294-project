@@ -1,5 +1,5 @@
 # Modul 294 LB B Backend
-## Version: 2.1.0
+## Version: 2.2.0
 
 ### /tasks
 
@@ -117,6 +117,12 @@ List all tasks
 | 200 | Successful operation |
 | 401 | Unauthorized |
 
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
 #### PUT
 ##### Summary
 
@@ -135,6 +141,12 @@ Update an existing task by Id
 | 401 | Unauthorized |
 | 404 | Task not found |
 
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
 #### POST
 ##### Summary
 
@@ -151,6 +163,12 @@ Add a new task
 | 200 | Successful operation |
 | 400 | Invalid input |
 | 401 | Unauthorized |
+
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
 
 ### /auth/cookie/task/{taskId}
 
@@ -178,6 +196,12 @@ Returns a single task
 | 401 | Unauthorized |
 | 404 | Task not found |
 
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
 #### DELETE
 ##### Summary
 
@@ -200,21 +224,18 @@ delete a task
 | 400 | Invalid task value |
 | 401 | Unauthorized |
 
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
 ### /auth/cookie/login
 
-#### GET
+#### POST
 ##### Summary
 
 Logs user into the system
-
-##### Description
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| email | query | The user name for login | No | string |
-| password | query | The password for login in clear text | No | string |
 
 ##### Responses
 
@@ -222,6 +243,12 @@ Logs user into the system
 | ---- | ----------- |
 | 200 | successful operation |
 | 400 | Invalid email/password supplied |
+
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
 
 ### /auth/cookie/status
 
@@ -237,9 +264,15 @@ Returns the email when logged in
 | 200 | successful operation |
 | 401 | Unauthorized |
 
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
 ### /auth/cookie/logout
 
-#### GET
+#### POST
 ##### Summary
 
 Logs out current logged in user session
@@ -256,6 +289,165 @@ Logs out current logged in user session
 | Code | Description |
 | ---- | ----------- |
 | default | successful operation |
+
+### /auth/jwt/tasks
+
+#### GET
+##### Summary
+
+List all tasks
+
+##### Description
+
+List all tasks
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200 | Successful operation |
+| 401 | Unauthorized |
+
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
+#### PUT
+##### Summary
+
+Update an existing task
+
+##### Description
+
+Update an existing task by Id
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200 | Successful operation |
+| 400 | Invalid ID supplied |
+| 401 | Unauthorized |
+| 404 | Task not found |
+
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
+#### POST
+##### Summary
+
+Add a new task
+
+##### Description
+
+Add a new task
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200 | Successful operation |
+| 400 | Invalid input |
+| 401 | Unauthorized |
+
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
+### /auth/jwt/task/{taskId}
+
+#### GET
+##### Summary
+
+Find task by ID
+
+##### Description
+
+Returns a single task
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ---- |
+| taskId | path | ID of task to return | Yes | long |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200 | successful operation |
+| 400 | Invalid ID supplied |
+| 401 | Unauthorized |
+| 404 | Task not found |
+
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
+#### DELETE
+##### Summary
+
+Deletes a task
+
+##### Description
+
+delete a task
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ---- |
+| taskId | path | Task id to delete | Yes | long |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 400 | Invalid task value |
+| 401 | Unauthorized |
+
+##### Security
+
+| Security Schema | Scopes |
+| --- | --- |
+| jwtAuth | |
+
+### /auth/jwt/sign
+
+#### POST
+##### Summary
+
+Generates jwt token
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200 | successful operation |
+| 400 | Invalid email/password supplied |
+
+### /auth/jwt/verify
+
+#### GET
+##### Summary
+
+Returns the email when token is valid
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200 | successful operation |
+| 401 | Unauthorized |
 
 ### Models
 
