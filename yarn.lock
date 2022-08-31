@@ -73,6 +73,14 @@
     cookie "^0.5.0"
     fastify-plugin "^4.0.0"
 
+"@fastify/cors@^8.1.0":
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/@fastify/cors/-/cors-8.1.0.tgz#af29ddb32675310dfcbbe3aa0af4b7ed29fdb956"
+  integrity sha512-1OmjwyxQZ8GePxa5t1Rpsn2qS56+1ouKMvZufpgJWhXtoCeM/ffA+PsNW8pyslPr4W0E27gVoFqtvHwhXW1U2w==
+  dependencies:
+    fastify-plugin "^4.0.0"
+    mnemonist "0.39.2"
+
 "@fastify/deepmerge@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@fastify/deepmerge/-/deepmerge-1.1.0.tgz#91f0a5a27034ff76b7bece63a5906894940ace82"
@@ -1456,7 +1464,7 @@ minimist@^1.2.0, minimist@^1.2.6:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
   integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
 
-mnemonist@^0.39.0:
+mnemonist@0.39.2, mnemonist@^0.39.0:
   version "0.39.2"
   resolved "https://registry.yarnpkg.com/mnemonist/-/mnemonist-0.39.2.tgz#7e6a0bd5c7199460ee12a651103c7007adc6225a"
   integrity sha512-n3ZCEosuMH03DVivZ9N0fcXPWiZrBLEdfSlEJ+S/mJxmk3zuo1ur0dj9URDczFyP1VS3wfiyKzqLLDXoPJ6rPA==

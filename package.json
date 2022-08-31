@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@fastify/cookie": "^8.0.0",
+    "@fastify/cors": "^8.1.0",
     "@fastify/jwt": "^6.3.2",
     "@fastify/session": "^9.0.0",
     "fastify": "^4.5.2",
