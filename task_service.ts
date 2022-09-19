@@ -34,7 +34,7 @@ export function getNextId (): number {
 }
 
 export function addTask ({ title, completed }: Partial<Task>): Task {
-  if (!title || title.length < 1) {
+  if (title === undefined || title?.length < 1) {
     throw new Error("property 'title' must be at least 1 character long")
   }
 
@@ -51,11 +51,12 @@ export function updateTask ({ id, title, completed }: Partial<Task>): Task | und
   const task = getTaskById(id)
   if (task == null) return
 
-  if (!title || title.length < 1) {
+  if (title === undefined || title?.length < 1) {
     throw new Error("property 'title' must be at least 1 character long")
+  } else {
+    task.title = title
   }
 
-  if (title) task.title = title
   if (completed !== undefined) task.completed = completed
 
   return task
