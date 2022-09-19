@@ -30,6 +30,9 @@ export function deleteTaskById (id: number | undefined) {
 }
 
 export function getNextId (): number {
+  if (tasks.length === 0) {
+    return 1
+  }
   return Math.max(...tasks.map(task => task.id)) + 1
 }
 
