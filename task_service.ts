@@ -33,15 +33,17 @@ export function getNextId (): number {
   return Math.max(...tasks.map(task => task.id)) + 1
 }
 
-export function addTask ({ title, completed }: Partial<Task>): Task {
+export function addTask ({ title, completed }: {title?: string, completed?: boolean}): Task {
   if (title === undefined || title?.length < 1) {
     throw new Error("property 'title' must be at least 1 character long")
   }
 
+  const completedString = completed as unknown as String
+
   const task: Task = {
     id: getNextId(),
     title,
-    completed: !!completed
+    completed: completedString === 'true'
   }
   tasks.push(task)
   return task
