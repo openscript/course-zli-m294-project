@@ -41,12 +41,10 @@ export function addTask ({ title, completed }: {title?: string, completed?: bool
     throw new Error("property 'title' must be at least 1 character long")
   }
 
-  const completedString = completed as unknown as String
-
   const task: Task = {
     id: getNextId(),
     title,
-    completed: completedString === 'true'
+    completed: completed === true || completed as unknown as string === 'true'
   }
   tasks.push(task)
   return task
@@ -62,7 +60,7 @@ export function updateTask ({ id, title, completed }: Partial<Task>): Task | und
     task.title = title
   }
 
-  if (completed !== undefined) task.completed = completed
+  task.completed = completed === true || completed as unknown as string === 'true'
 
   return task
 }

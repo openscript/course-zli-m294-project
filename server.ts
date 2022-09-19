@@ -15,7 +15,7 @@ setupJwtEndpoint(fastify)
 
 fastify.register(cors, {
   origin: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Credentials'],
   methods: ['GET', 'PUT', 'POST', 'DELETE'],
   credentials: true
 })
