@@ -20,7 +20,7 @@ export default function setup (fastify: FastifyInstance) {
   fastify.register(fastifySession, {
     cookieName: 'm294-session',
     secret: 'this is just an example, not a real secret',
-    cookie: { secure: false, httpOnly: true }
+    cookie: { secure: false, httpOnly: true, sameSite: 'lax' }
   })
 
   fastify.route({ ...routes.listTasks, url: '/auth/cookie/tasks', onRequest: authenticate })
